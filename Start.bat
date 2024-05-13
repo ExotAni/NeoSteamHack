@@ -1,13 +1,13 @@
 echo off
+chcp 1251
 title SteamHack
-chcp1251
+set kostil=%cd%
+
+:again
 cls
 echo Initialization...
 
-:again
-if exist %appdata%\directory.txt set /p check=<%appdata%\directory.txt
-if exist %check% goto skip
-
+if exist %appdata%\directory.txt goto skip
 
 FOR %%G IN (c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) do (
 
@@ -41,13 +41,21 @@ cls
 if not "%~1"=="" (
 	set exedirect="%~1"
 ) else (
-	echo Put your game ".exe" file here:
+	echo Your current SteamApps direct is: "%steamdirect%"
+	echo.
+	echo Put your game ".exe" file here:		    Also you can:
+	echo 					 1^) short - shortcut for "SendTo" 
+	echo 					 2^) del - delete shortcut from "SendTo" 
+	echo 					 3^) path - change the path to "steamapps" 
+	echo 					 4^) remove - delete the path to "steamapps"
+	echo 					 5^) exit - ...no comments 
 	set /p exedirect=">>>"
 )
 
 if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && cls && echo msgbox"Link succesful created." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs && goto short
 if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && cls && echo msgbox"Link succesful deleted." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs && goto again
 if %exedirect% == path goto newpath
+if %exedirect% == remove goto remove
 if %exedirect% == exit exit
 
 set bruh=%exedirect%
@@ -78,20 +86,24 @@ if exist "SteamworksExample.exe" del /f /q "SteamworksExample.exe"
 if exist "SteamworksExample.ahk" del /f /q "SteamworksExample.ahk"
 echo msgbox"Можешь запускать Spacewar." > warning4.vbs && start warning4.vbs && timeout /t 1 /nobreak>nul && del /f /q warning4.vbs
 exit
-
 :a
 echo msgbox"Установи Spacewar и попробуй снова." > warning5.vbs && start warning5.vbs && timeout /t 1 /nobreak>nul && del /f /q warning5.vbs
 :request
 cls
-echo Do u wanna install Spacewar? y\n
+echo Do u wanna install Spacewar? y\n	    Also you can:
+echo 					 1) path - change the path to steamapps
+echo 					 2) remove - delete the path to steamapps
+echo 					 3) y - install SpaceWar
+echo 					 4) n - exit
 set /p choice=">>>"
+if %choice% == path goto newpath
+if %choice% == remove goto remove
 if %choice% == y goto b
 if not %choice% == n goto request
 exit
 :b
 start Compiler\SpacewarInstall.exe
 exit
-
 :short
 	echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut2.vbs
 	echo sLinkFile = "%appdata%\Microsoft\Windows\SendTo\SteamHack.lnk" >> shortcut2.vbs
@@ -108,4 +120,10 @@ echo Insert your SteamApps path:
 set /p newpath=">>>"
 echo %newpath% > %appdata%\directory.txt
 echo msgbox"New path succesful added." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs
+goto again
+:remove
+cls
+del /f /q %appdata%\directory.txt
+echo msgbox"The path succesful deleted." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs
+timeout /t 1 /nobreak>nul
 goto again
