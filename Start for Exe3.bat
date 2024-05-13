@@ -102,7 +102,7 @@ if %choice% == y goto b
 if not %choice% == n goto request
 exit
 :b
-start SpacewarInstall.exe
+start steam://install/480
 exit
 :short
 	echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut2.vbs
