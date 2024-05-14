@@ -52,8 +52,8 @@ if not "%~1"=="" (
 	set /p exedirect=">>>"
 )
 
-if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && cls && echo msgbox"Link succesful created." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs && goto short
-if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && cls && echo msgbox"Link succesful deleted." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs && goto again
+if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && set message=Link succesful created. && call :messagebox && goto short
+if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && set message=Link succesful deleted. && call :messagebox && goto again
 if %exedirect% == path goto newpath
 if %exedirect% == remove goto remove
 if %exedirect% == exit exit
@@ -67,9 +67,9 @@ set timer=16
 goto timer
 
 :end
-call set workdirect=%%exedirect:%bruh%=%%
-set workdirect=%workdirect:"=%
-set exedirect=%exedirect:"=%
+call set workdirect=%%exedirect:%bruh%=%% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
+set workdirect=%workdirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
+set exedirect=%exedirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
 echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut.vbs
 echo sLinkFile = "%steamdirect%\common\Spacewar\SteamworksExample.lnk" >> shortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut.vbs
@@ -80,14 +80,14 @@ cscript /nologo shortcut.vbs
 del shortcut.vbs
 
 echo run "%steamdirect%\common\Spacewar\SteamworksExample.lnk" > SteamworksExample.ahk
-Compiler\Ahk2Exe.exe /in "SteamworksExample.ahk" || echo msgbox"Maybe u haven't the Compiler, maybe incorrect path, idk. Подумай." > warning3.vbs && start warning3.vbs && timeout /t 1 /nobreak>nul && del /f /q warning3.vbs && del /f /q "SteamworksExample.ahk" && exit
-xcopy "SteamworksExample.exe" "%steamdirect%\common\Spacewar\" /y
+Compiler\Ahk2Exe.exe /in "SteamworksExample.ahk" || set message=Maybe u haven't the Compiler, maybe incorrect path, idk. Think about it. && call :messagebox && del /f /q "SteamworksExample.ahk" && exit
+xcopy "SteamworksExample.exe" "%steamdirect%\common\Spacewar\" /y>nul
 if exist "SteamworksExample.exe" del /f /q "SteamworksExample.exe"
 if exist "SteamworksExample.ahk" del /f /q "SteamworksExample.ahk"
-echo msgbox"Можешь запускать Spacewar." > warning4.vbs && start warning4.vbs && timeout /t 1 /nobreak>nul && del /f /q warning4.vbs
+set message=Now u can start Spacewar. && call :messagebox
 exit
 :a
-echo msgbox"Установи Spacewar и попробуй снова." > warning5.vbs && start warning5.vbs && timeout /t 1 /nobreak>nul && del /f /q warning5.vbs
+set message=Install Spacewar and try again. && call :messagebox
 :request
 cls
 echo Do u wanna install Spacewar? y\n	    Also you can:
@@ -119,11 +119,18 @@ cls
 echo Insert your SteamApps path:
 set /p newpath=">>>"
 echo %newpath% > %appdata%\directory.txt
-echo msgbox"New path succesful added." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs
+set message=New path succesful added. && call :messagebox
 goto again
 :remove
 cls
 del /f /q %appdata%\directory.txt
-echo msgbox"The path succesful deleted." > warning2.vbs && start warning2.vbs && timeout /t 1 /nobreak>nul && del /f /q warning2.vbs
+set message=The path succesful deleted. && call :messagebox
 timeout /t 1 /nobreak>nul
 goto again
+
+:messagebox
+echo msgbox"%message%">message.vbs
+start message.vbs
+timeout /t 1 /nobreak>nul
+del /f message.vbs
+exit /b
