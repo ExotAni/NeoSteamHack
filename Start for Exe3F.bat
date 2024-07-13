@@ -35,6 +35,7 @@ exit
 cd /d %kostil%
 set /p steamdirect= < %appdata%\directory.txt
 set steamdirect=%steamdirect:  =%
+set steamdirect=%steamdirect:"=%
 if not exist "%steamdirect%\common\Forgotten Souls" goto a
 
 cls
@@ -62,25 +63,27 @@ set bruh=%exedirect%
 set timer=16
 :timer
 	set /a timer=%timer%-1
-		set bruh=%bruh:*\=%
-	if %timer% EQU 0 goto end
-goto timer
+		set bruh="%bruh:*\=%"
+	if %timer% NEQ 0 goto timer
+set bruh=%bruh:"=%
 
-:end
-call set workdirect=%%exedirect:%bruh%=%% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
-set workdirect=%workdirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
-set exedirect=%exedirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
+call set workdirect=%%exedirect:%bruh%=%% || set message=Idk, Bug. && call :messagebox && exit
+set workdirect="%workdirect:"=%"
+set exedirect="%exedirect:"=%"
 echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut.vbs
 echo sLinkFile = "%steamdirect%\common\Forgotten Souls\Forgotten Souls.lnk" >> shortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut.vbs
-echo oLink.TargetPath = "%exedirect%" >> shortcut.vbs
-echo oLink.WorkingDirectory = "%workdirect%" >> shortcut.vbs
+echo oLink.TargetPath = %exedirect% >> shortcut.vbs
+echo oLink.WorkingDirectory = %workdirect:~0,-2%" >> shortcut.vbs
 echo oLink.Save >> shortcut.vbs
 cscript /nologo shortcut.vbs
 del shortcut.vbs
 
 echo run "%steamdirect%\common\Forgotten Souls\Forgotten Souls.lnk" > "Forgotten Souls.ahk"
-Ahk2Exe.exe /in "Forgotten Souls.ahk" || set message=Maybe u haven't the Compiler, maybe incorrect path, idk. Think about it. && call :messagebox && del /f /q "Forgotten Souls.ahk" && exit
+md Compiler
+xcopy Ahk2Exe.exe Compiler >nul
+xcopy AutoHotkeySC.bin Compiler >nul
+Compiler\Ahk2Exe.exe /in "Forgotten Souls.ahk" || set message=Maybe u haven't the Compiler, maybe you pressed 'No' in Compiler, idk. Try again. && call :messagebox && del /f /q "Forgotten Souls.ahk" && exit
 xcopy "Forgotten Souls.exe" "%steamdirect%\common\Forgotten Souls\" /y>nul
 if exist "Forgotten Souls.exe" del /f /q "Forgotten Souls.exe"
 if exist "Forgotten Souls.ahk" del /f /q "Forgotten Souls.ahk"
@@ -93,7 +96,7 @@ cls
 echo Do u wanna install Forgotten Souls? y\n	    Also you can:
 echo 					 1) path - change the path to steamapps
 echo 					 2) remove - delete the path to steamapps
-echo 					 3) y - install SpaceWar
+echo 					 3) y - install Forgotten Souls
 echo 					 4) n - exit
 set /p choice=">>>"
 if %choice% == path goto newpath

@@ -32,9 +32,10 @@ if not %choice% == n goto res
 exit
 
 :skip
-cd /d %~dp0
+cd /d %kostil%
 set /p steamdirect= < %appdata%\directory.txt
 set steamdirect=%steamdirect:  =%
+set steamdirect=%steamdirect:"=%
 if not exist "%steamdirect%\common\Spacewar" goto a
 
 cls
@@ -62,25 +63,24 @@ set bruh=%exedirect%
 set timer=16
 :timer
 	set /a timer=%timer%-1
-		set bruh=%bruh:*\=%
-	if %timer% EQU 0 goto end
-goto timer
+		set bruh="%bruh:*\=%"
+	if %timer% NEQ 0 goto timer
+set bruh=%bruh:"=%
 
-:end
-call set workdirect=%%exedirect:%bruh%=%% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
-set workdirect=%workdirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
-set exedirect=%exedirect:"=% || set message=The game title contains a prohibited symbol. Bug. && call :messagebox && exit
+call set workdirect=%%exedirect:%bruh%=%% || set message=Idk, Bug. && call :messagebox && exit
+set workdirect="%workdirect:"=%"
+set exedirect="%exedirect:"=%"
 echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut.vbs
 echo sLinkFile = "%steamdirect%\common\Spacewar\SteamworksExample.lnk" >> shortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut.vbs
-echo oLink.TargetPath = "%exedirect%" >> shortcut.vbs
-echo oLink.WorkingDirectory = "%workdirect%" >> shortcut.vbs
+echo oLink.TargetPath = %exedirect% >> shortcut.vbs
+echo oLink.WorkingDirectory = %workdirect:~0,-2%" >> shortcut.vbs
 echo oLink.Save >> shortcut.vbs
 cscript /nologo shortcut.vbs
 del shortcut.vbs
 
 echo run "%steamdirect%\common\Spacewar\SteamworksExample.lnk" > SteamworksExample.ahk
-Compiler\Ahk2Exe.exe /in "SteamworksExample.ahk" || set message=Maybe u haven't the Compiler, maybe incorrect path, idk. Think about it. && call :messagebox && del /f /q "SteamworksExample.ahk" && exit
+Compiler\compiler\Ahk2Exe.exe /in "SteamworksExample.ahk" || set message=Maybe u haven't the Compiler, maybe you pressed 'No' in Compiler, idk. Try again. && call :messagebox && del /f /q "SteamworksExample.ahk" && exit
 xcopy "SteamworksExample.exe" "%steamdirect%\common\Spacewar\" /y>nul
 if exist "SteamworksExample.exe" del /f /q "SteamworksExample.exe"
 if exist "SteamworksExample.ahk" del /f /q "SteamworksExample.ahk"
