@@ -1,6 +1,6 @@
 echo off
 chcp 1251
-title SteamHack
+title NeoSteamHack
 set kostil=%cd%
 
 :again
@@ -53,8 +53,8 @@ if not "%~1"=="" (
 	set /p exedirect=">>>"
 )
 
-if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && set message=Link succesful created. && call :messagebox && goto short
-if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\SteamHack.lnk && set message=Link succesful deleted. && call :messagebox && goto again
+if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk && set message=Link succesful created. && call :messagebox && goto short
+if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk && set message=Link succesful deleted. && call :messagebox && goto again
 if %exedirect% == path goto newpath
 if %exedirect% == remove goto remove
 if %exedirect% == exit exit
@@ -71,7 +71,7 @@ call set workdirect=%%exedirect:%bruh%=%% || set message=Idk, Bug. && call :mess
 set workdirect="%workdirect:"=%"
 set exedirect="%exedirect:"=%"
 echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut.vbs
-echo sLinkFile = "%steamdirect%\common\Spacewar\SteamworksExample.lnk" >> shortcut.vbs
+echo sLinkFile = "%steamdirect%\common\Spacewar\game_link.lnk" >> shortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut.vbs
 echo oLink.TargetPath = %exedirect% >> shortcut.vbs
 echo oLink.WorkingDirectory = %workdirect:~0,-2%" >> shortcut.vbs
@@ -79,11 +79,7 @@ echo oLink.Save >> shortcut.vbs
 cscript /nologo shortcut.vbs
 del shortcut.vbs
 
-echo run "%steamdirect%\common\Spacewar\SteamworksExample.lnk" > SteamworksExample.ahk
-Compiler\compiler\Ahk2Exe.exe /in "SteamworksExample.ahk" || set message=Maybe u haven't the Compiler, maybe you pressed 'No' in Compiler, idk. Try again. && call :messagebox && del /f /q "SteamworksExample.ahk" && exit
 xcopy "SteamworksExample.exe" "%steamdirect%\common\Spacewar\" /y>nul
-if exist "SteamworksExample.exe" del /f /q "SteamworksExample.exe"
-if exist "SteamworksExample.ahk" del /f /q "SteamworksExample.ahk"
 set message=Now u can start Spacewar. && call :messagebox
 exit
 :a
@@ -106,7 +102,7 @@ start steam://install/480
 exit
 :short
 	echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut2.vbs
-	echo sLinkFile = "%appdata%\Microsoft\Windows\SendTo\SteamHack.lnk" >> shortcut2.vbs
+	echo sLinkFile = "%appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk" >> shortcut2.vbs
 	echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut2.vbs
 	echo oLink.TargetPath = "%~dp0Start.bat" >> shortcut2.vbs
 	echo oLink.WorkingDirectory = "%~dp0" >> shortcut2.vbs
