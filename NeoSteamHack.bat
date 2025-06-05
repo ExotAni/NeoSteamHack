@@ -1,106 +1,113 @@
+::Init
 echo off
 chcp 1251
+setlocal enabledelayedexpansion
+color 0a
 title NeoSteamHack
-set kostil=%cd%
-
-:again
 cls
+
+
+
+
+
+
+:: Creating shortcut in "Send to" by clicking right mouse button to file
+if "%~1"=="" call :create_shortcut_sendto
+
+
+
+::Finding SteamLibrary with Spacewar
 echo Initialization...
 
-if exist %appdata%\directory.txt goto skip
+pushd "%temp%"
 
-FOR %%G IN (c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) do (
+    powershell -command $steamProcess = Get-Process -Name "steam">nul
+    if not %errorlevel% == 0 call :messagebox "Сначала стим включи, полудурок" && start steam:: && exit
 
-	if exist "%%G:\Program Files\SteamLibrary\steamapps" echo %%G:\Program Files\SteamLibrary\steamapps > %appdata%\directory.txt && goto skip
-	if exist "%%G:\Program Files (x86)\SteamLibrary\steamapps" echo %%G:\Program Files (x86^)\SteamLibrary\steamapps > %appdata%\directory.txt && goto skip
-	if exist "%%G:\Program Files\Steam\steamapps" echo %%G:\Program Files\Steam\steamapps > %appdata%\directory.txt && goto skip
-	if exist "%%G:\Program Files (x86)\Steam\steamapps" echo %%G:\Program Files (x86^)\Steam\steamapps > %appdata%\directory.txt && goto skip
-	if exist "%%G:\SteamLibrary\steamapps" echo %%G:\SteamLibrary\steamapps > %appdata%\directory.txt && goto skip
-)
+    powershell -command $steamProcess = Get-Process -Name "steam"; $steamPath = $steamProcess.Path; Write-Host "$steamPath">steam.exe_path.txt
+    set /p steam_path=<steam.exe_path.txt
+    set steam_path=%steam_path:~0,-10%
 
-for %%K in (d,e,c,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) do (
-	cd /d %%K:\ & dir /s /b steamapps >nul
-	if %errorlevel% EQU 0 dir /s /b steamapps > %appdata%\directory.txt && goto skip
-)	
+popd
 
-:res
-cls
-echo Can not find Steam path. Do u wanna insert correct path? y\n
-set /p choice =">>>"
-if %choice% == y goto newpath
-if not %choice% == n goto res
-exit
 
-:skip
-cd /d %kostil%
-set /p steamdirect= < %appdata%\directory.txt
-set steamdirect=%steamdirect:  =%
-set steamdirect=%steamdirect:"=%
-if not exist "%steamdirect%\common\Spacewar" goto a
+set counter=1
 
+:while_path_is_False
+    call :for_path %counter%
+if %errorlevel% == 449 goto :while_path_is_False
+if %errorlevel% == 404 call :have_no_spacewar
+
+set steam_library_path=%steam_library_path:~1,-1%
+set steam_library_path=%steam_library_path:\\=\%
+
+
+
+::Inputing .exe's path for converting to Spacewar
 cls
 if not "%~1"=="" (
-	set exedirect="%~1"
+	set lnk_exe="%~1"
 ) else (
-	echo Your current SteamApps direct is: "%steamdirect%"
+	echo Your current Steam Library direct is: "%steam_library_path%\steamapps\"
 	echo.
 	echo Put your game ".exe" file here:		    Also you can:
-	echo 					 1^) short - shortcut for "SendTo" 
-	echo 					 2^) del - delete shortcut from "SendTo" 
-	echo 					 3^) path - change the path to "steamapps" 
-	echo 					 4^) remove - delete the path to "steamapps"
-	echo 					 5^) exit - ...no comments 
-	set /p exedirect=">>>"
+	echo 					 1^) exit - ...no comments 
+	set /p lnk_exe=">>>"
 )
+if %lnk_exe% == exit exit
 
-if %exedirect% == short del /f /q %appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk && set message=Link succesful created. && call :messagebox && goto short
-if %exedirect% == del del /f /q %appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk && set message=Link succesful deleted. && call :messagebox && goto again
-if %exedirect% == path goto newpath
-if %exedirect% == remove goto remove
-if %exedirect% == exit exit
 
-set bruh=%exedirect%
-set timer=16
-:timer
-	set /a timer=%timer%-1
-		set bruh="%bruh:*\=%"
-	if %timer% NEQ 0 goto timer
-set bruh=%bruh:"=%
 
-call set workdirect=%%exedirect:%bruh%=%% || set message=Idk, Bug. && call :messagebox && exit
-set workdirect="%workdirect:"=%"
-set exedirect="%exedirect:"=%"
+::Doing "format-magic" for .exe path 
+set temp_path=%lnk_exe%
+set counter=16
+:loop
+	set /a counter=%counter%-1
+		set temp_path="%temp_path:*\=%"
+	if %counter% NEQ 0 goto :loop
+set temp_path=%temp_path:"=%
+call set lnk_work_direct=%%lnk_exe:%temp_path%=%% || call :messagebox "Idk, Bug." && exit
+set lnk_work_direct="%lnk_work_direct:"=%"
+set lnk_exe="%lnk_exe:"=%"
+
+
+
+::Creating .lnk file and copying stuff in Spacewar folder
 echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut.vbs
-echo sLinkFile = "%steamdirect%\common\Spacewar\game_link.lnk" >> shortcut.vbs
+echo sLinkFile = "%steam_library_path%\steamapps\common\Spacewar\game_link.lnk" >> shortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut.vbs
-echo oLink.TargetPath = %exedirect% >> shortcut.vbs
-echo oLink.WorkingDirectory = %workdirect:~0,-2%" >> shortcut.vbs
+echo oLink.TargetPath = %lnk_exe% >> shortcut.vbs
+echo oLink.WorkingDirectory = %lnk_work_direct:~0,-2%" >> shortcut.vbs
 echo oLink.Save >> shortcut.vbs
 cscript /nologo shortcut.vbs
 del shortcut.vbs
 
-xcopy "SteamworksExample.exe" "%steamdirect%\common\Spacewar\" /y>nul
-set message=Now u can start Spacewar. && call :messagebox
+xcopy "SteamworksExample.exe" "%steam_library_path%\steamapps\common\Spacewar\" /y>nul
+call :messagebox "Now u can start Spacewar."
 exit
-:a
-set message=Install Spacewar and try again. && call :messagebox
-:request
+
+
+
+
+
+
+
+
+
+
+::Definitions :)
+:have_no_spacewar
 cls
-echo Do u wanna install Spacewar? y\n	    Also you can:
-echo 					 1) path - change the path to steamapps
-echo 					 2) remove - delete the path to steamapps
-echo 					 3) y - install SpaceWar
-echo 					 4) n - exit
-set /p choice=">>>"
-if %choice% == path goto newpath
-if %choice% == remove goto remove
-if %choice% == y goto b
-if not %choice% == n goto request
+echo Install Spacewar and restart Steam.         Also you can:
+echo 					 1) y - install SpaceWar
+echo 					 2) n - exit
+set /p answer="Wanna install Spacewar? y\n >>>"
+if %answer% == y start steam://install/480 && exit
+if not %answer% == n goto :have_no_spacewar
 exit
-:b
-start steam://install/480
-exit
-:short
+
+
+:create_shortcut_sendto
 	echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut2.vbs
 	echo sLinkFile = "%appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk" >> shortcut2.vbs
 	echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut2.vbs
@@ -109,24 +116,39 @@ exit
 	echo oLink.Save >> shortcut2.vbs
 	cscript /nologo shortcut2.vbs
 	del shortcut2.vbs
-goto again
-:newpath
-cls
-echo Insert your SteamApps path:
-set /p newpath=">>>"
-echo %newpath% > %appdata%\directory.txt
-set message=New path succesful added. && call :messagebox
-goto again
-:remove
-cls
-del /f /q %appdata%\directory.txt
-set message=The path succesful deleted. && call :messagebox
-timeout /t 1 /nobreak>nul
-goto again
+exit /b
+
 
 :messagebox
-echo msgbox"%message%">message.vbs
-start message.vbs
-timeout /t 1 /nobreak>nul
-del /f message.vbs
+	echo msgbox"%~1">message.vbs
+	start message.vbs
+	timeout /t 1 /nobreak>nul
+	del /f message.vbs
+exit /b
+
+
+:for_path
+    for /F "usebackq skip=%1 delims=" %%a in ("%steam_path%\steamapps\libraryfolders.vdf") do (
+        set /a counter+=1
+        echo %%a|findstr \"path\"
+        if not !errorlevel! == 1 (
+            call :for_480 !counter!
+            if !errorlevel! == 449 exit /b 449
+            if !errorlevel! == 218 (
+                for /F "tokens=1,* delims=		" %%c in ("%%a") do (set steam_library_path=%%d)
+                exit /b 218
+            )
+        )
+    )>nul
+exit /b 404
+
+
+:for_480
+    for /F "usebackq skip=%1 delims=" %%b in ("%steam_path%\steamapps\libraryfolders.vdf") do (
+        set /a counter+=1
+        echo %%b|findstr \"480\"
+        if not !errorlevel! == 1 exit /b 218
+        echo %%b|findstr "}"
+        if not !errorlevel! == 1 exit /b 449
+    )>nul
 exit /b
