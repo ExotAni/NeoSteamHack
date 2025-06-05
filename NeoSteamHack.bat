@@ -21,7 +21,7 @@ FOR %%G IN (c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) do (
 for %%K in (d,e,c,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) do (
 	cd /d %%K:\ & dir /s /b steamapps >nul
 	if %errorlevel% EQU 0 dir /s /b steamapps > %appdata%\directory.txt && goto skip
-)		
+)	
 
 :res
 cls
@@ -104,7 +104,7 @@ exit
 	echo Set oWS = WScript.CreateObject("WScript.Shell") > shortcut2.vbs
 	echo sLinkFile = "%appdata%\Microsoft\Windows\SendTo\NeoSteamHack.lnk" >> shortcut2.vbs
 	echo Set oLink = oWS.CreateShortcut(sLinkFile) >> shortcut2.vbs
-	echo oLink.TargetPath = "%~dp0NeoSteamHack.exe" >> shortcut2.vbs
+	echo oLink.TargetPath = "%~dp0NeoSteamHack.bat" >> shortcut2.vbs
 	echo oLink.WorkingDirectory = "%~dp0" >> shortcut2.vbs
 	echo oLink.Save >> shortcut2.vbs
 	cscript /nologo shortcut2.vbs
